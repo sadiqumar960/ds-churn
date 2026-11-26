@@ -186,3 +186,42 @@ def test_cli_threshold_scoring_and_csv_output(tmp_path: Path, monkeypatch: pytes
 def _write_csv(df: pd.DataFrame, path: Path) -> Path:
     df.to_csv(path, index=False)
     return path
+
+
+def test_train_main_generates_pipeline_and_metrics(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    import json
+
+    fake_src = tmp_path / "src"
+    fake_src.mkdir()
+    fake_train_file = fake_src / "train.py"
+    fake_train_file.write_text("# marker\n", encoding="utf-8")
+
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    # 60 rows with enough positive cases so both train (48) and test (12) include Churn=Yes
+    train_df = _make_telco_df(n_rows=60, seed=21)
+    train_df.loc[::3, "Churn"] = "Yes"
+    train_df.loc[1::6, "Churn"] = "No"
+    _write_csv(train_df, data_dir / "telecom_churn_dataset.csv")
+
+    monkeypatch.setattr(train_mod, "__file__", str(fake_train_file))
+    train_mod.main()
+
+    pipeline_file = tmp_path / "models" / "churn_pipeline.joblib"
+    metrics_file = tmp_path / "models" / "churn_metrics.json"
+
+    assert pipeline_file.exists()
+    assert metrics_file.exists()
+
+    loaded_pipe = joblib.load(pipeline_file)
+    assert hasattr(loaded_pipe, "predict_proba")
+
+    metrics = json.loads(metrics_file.read_text(encoding="utf-8"))
+    for key in ("accuracy", "f1", "roc_auc", "pr_auc", "scale_pos_weight", "train_rows", "test_rows"):
+        assert key in metrics
+
+    assert metrics["train_rows"] == 48
+    assert metrics["test_rows"] == 12
+    assert 0.0 <= metrics["roc_auc"] <= 1.0
+    assert 0.0 <= metrics["pr_auc"] <= 1.0
+    assert metrics["scale_pos_weight"] > 0
