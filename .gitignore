@@ -1,10 +1,21 @@
-__pycache__/
-*.py[cod]
-.ipynb_checkpoints/
+# Virtual environments & Jupyter state
 .venv/
 venv/
-.env
-data/*
-!data/.gitkeep
-*.csv
-*.parquet
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Model artifacts & raw data (track intentionally if desired)
+models/*.joblib
+models/*.pkl
+models/*.json
+data/*.csv
+!data/sample*.csv
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
