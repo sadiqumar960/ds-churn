@@ -19,3 +19,4 @@ data/*.csv
 Thumbs.db
 .vscode/
 .idea/
+.pytest_cache/
