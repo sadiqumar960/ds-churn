@@ -1,5 +1,7 @@
 # Telecom Customer Churn (`ds-churn`)
 
+[![pytest](https://github.com/sadiqumar960/ds-churn/actions/workflows/pytest.yml/badge.svg?branch=main)](https://github.com/sadiqumar960/ds-churn/actions/workflows/pytest.yml)
+
 End-to-end customer churn modeling and threshold analysis on the Telco Customer Churn dataset (`7,043` rows, `21` columns, binary `Churn` target) using a reproducible `scikit-learn` pipeline and `XGBoost`.
 
 ## Project Structure
